@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <script src="https://www.gstatic.com/firebasejs/8.8.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.8.1/firebase-database.js"></script>
+    <script src="https://code.jquery.com/jquery-latest.js"></script>
+
+    <meta name="description" content="" />
+    <meta name="author" content="" />
+    <!-- Favicon-->
+    <link rel="icon" type="image/x-icon" href="assets/favicon.ico" />
+
+    <title>SCHfirebase</title>
+    <link href="css/styles.css" rel="stylesheet" />
+
+    <script>
+
+
+      $(document).ready(()=> {
+
+        // functions를 통해 로그인 기능 만들기
+        // ajax는 특정 url의 정보를 가져올 수 있게한다.
+
+        // 채팅내용 가져오기
+        $.ajax({
+          url: "https://us-central1-schfirebase-3e909.cloudfunctions.net/helloWorld3", // 클라이언트가 요청을 보낼 서버의 URL 주소
+          type: "POST",                             // HTTP 요청 방식(GET, POST)
+          dataType: "json"                         // 서버에서 보내줄 데이터의 타입
+        })
+
+        .done(function (json) {
+          for(key in json) {
+            $("#chatList").append("<div>"+json[key]+"</div>");
+          };
+        });
+
+
+        // 회원가입(join)
+        function joinCall() {
+          let idvalue = $("#idvalue").val();
+          let pwvalue = $("#pwvalue").val();
+          $.ajax({
+            url: "https://us-central1-schfirebase-3e909.cloudfunctions.net/join", // 클라이언트가 요청을 보낼 서버의 URL 주소
+            type: "POST",
+            data: {id: idvalue, pw: pwvalue},
+            dataType: "json"                         // 서버에서 보내줄 데이터의 타입
+          })
+
+          .done(function(json) {
+          });
+
+        };
+
+
+        // loadMsg함수 생성
+        function loadMsgs() { // 기능을 함수로 묶어줌
+          database.ref("msgs").on("value", (snapshot)=> { //snapshot이라는 매개변수를 통해 값이 들어옴
+            $("#chatList").html(""); // #chatList값을 비워줌
+            snapshot.forEach((child)=> { // child값만큼 반복
+              $("#chatList").append("<div>"+child.val()+"</div>"); // #chatList에 child의 값을 추가한다.
+            }); // 
+          });
+        };
+
+
+        // 로그인(login)
+        function loginCall() {
+          let idvalue = $("#idvalue").val();
+          let pwvalue = $("#pwvalue").val();
+          $.ajax({
+            url: "https://us-central1-schfirebase-3e909.cloudfunctions.net/login",
+            type: "POST",
+            data: {id: idvalue, pw: pwvalue},
+            dataType: "json"
+          })
+
+          .done(function(json) {
+            if(json["result_code"] == 1) {
+              loadMsgs();
+              alert(json["result"]);
+            } else if (json["result_code"] == 2) {
+              alert(json["result"]);
+            } else if (json["result_code"] == 3) {
+              alert(json["result"]);
+            }
+          })
+        };
+
+        // SMS발송
+        function sendCall() {
+          let phoneval = $("#phone").val();
+          $.ajax({
+            url: "https://us-central1-schfirebase-3e909.cloudfunctions.net/sendSMS",
+            type: "POST",
+            data: {phone: phoneval},
+            dataType: "json"
+          })
+          .done(function(json) { 
+            console.log(json);
+          });
+
+        };
+
+
+        $("#chatList").hide(); // 채팅내용의 기본값은 숨겨놓기
+
+        // 회원가입 실행
+        $("#join").on("click", ()=> {
+          joinCall();
+        });
+
+        // 로그인 실행
+        $("#login").on("click", ()=> {
+          loginCall();
+        });
+
+        // sms발송 실행
+        $("#send").on("click", () => {
+          sendCall();
+        })
+
+      });
+
+
+    </script>
+
+
+  </html>
+
+  <body>
+     <!-- Responsive navbar-->
+     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+      <div class="container">
+          <a class="navbar-brand" href="#">SEONGCHANGHUN Page</a>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation"><span class="navbar-toggler-icon"></span></button>
+          <div class="collapse navbar-collapse" id="navbarSupportedContent">
+              <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+                  <li class="nav-item"><a class="nav-link active" aria-current="page" href="#">Home</a></li>
+                  <li class="nav-item"><a class="nav-link" href="#">Link</a></li>
+                  <li class="nav-item dropdown">
+                      <a class="nav-link dropdown-toggle" id="navbarDropdown" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Dropdown</a>
+                      <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
+                          <li><a class="dropdown-item" href="#">Action</a></li>
+                          <li><a class="dropdown-item" href="#">Another action</a></li>
+                          <li><hr class="dropdown-divider" /></li>
+                          <li><a class="dropdown-item" href="#">Something else here</a></li>
+                      </ul>
+                  </li>
+              </ul>
+          </div>
+      </div>
+  </nav>
+  <!-- Page content-->
+  <div class="container">
+      <div class="text-center mt-5">
+          <h1>SCH Firebase/Bootstrap Practice</h1>
+          <p class="lead">Hello! Welcome to SCH Web page!</p>
+          <p>Page making practice</p>
+      </div>
+  </div>
+  <!-- Bootstrap core JS-->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+  <!-- Core theme JS-->
+  <script src="js/scripts.js"></script>
+  
+  <div class="SCHmaking">
+    <input type="text" id="idvalue" placeholder="아이디">
+    <input type="text" id="pwvalue" placeholder="패스워드">
+    <input type="text" id="phone" placeholder="휴대폰 번호">
+    <button id="join">회원가입</button>
+    <button id="login">로그인</button>
+    <button id="send">메시지 발송</button>
+  </div>
+
+    <div id="chatList">
+      채팅내용
+    </div>
+    
+
+  </body>
+
+    
